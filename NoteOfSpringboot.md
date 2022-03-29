@@ -55,8 +55,11 @@
 
 ### MVC模式
 MVC是Model(模式)、View(视图)、Controller(控制器)的简写。
+
 * Model:是JAVA的实体Bean，代表存取数据的对象或POJO(Plain Ordinary Java Objects，简单的Java对象)，也可以带有逻辑。其作用是在内存中暂时存储数据，并在数据变化时更新控制器(如果要持久化，则需要把它写入数据库或者磁盘文件中)。
+
 * View:主要用来解析，处理、显示内容，并进行模板渲染。
+
 * Controller:主要用来处理视图中的响应。它决定如何调用Model(模型)的实体Bean、如何调用业务层的数据增加、删除、修改和查询等业务操作，以及如何将结果返给视图进行渲染。建议在控制器中尽量不让业务逻辑代码。
 
 #### 整个工程流程
@@ -68,6 +71,7 @@ MVC是Model(模式)、View(视图)、Controller(控制器)的简写。
 (3) ViewResolver将ModelAndView或Exception解析成View。然后View会调用render()方法，并根据ModelAndView中的数据渲染出页面。
 ### 三层架构
 三层架构，就是将整个应用程序划分为表现层(UI)、业务逻辑层(Service)、数据访问层(DAO/Repository)。
+
 * 表现层:用于展示界面。主要对用户的请求进行接受，以及进行数据的返回。它为客户端(用户)提供应用程序的访问接口(界面)。
 * 业务逻辑层:是三层架构的服务层，负责业务逻辑处理，主要是调用DAO层对数据进行增加、删除、修改和查询等操作。
 * 数据访问层:与数据库进行交互的持久层，被Service调用。在Spring Data JPA中Hibernate来实现。
