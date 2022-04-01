@@ -170,7 +170,9 @@ Java API中最常用到的类包括了String和StringBuffer（因为String是不
 * `void setCharAt(int index, char ch); // 替换字符`
 
 ### `hashCode()`和`equals()`的相关规定
+
 API文件有对对象的状态指定出必须遵守的规则：
+
 1. 如果两个对象相等，则hashcode必须也是相等的。
 2. 如果两个对象相等，对其中一个对象调用`equals()`必须返回true。也就是说，若`a.equals(b)`则`b.equals(a)`。
 3. 如果两个对象有相同的hashcode值，他们也不一定是相等的。但若两个对象相等，则hashcode值一定是相等的。
@@ -211,8 +213,6 @@ API文件有对对象的状态指定出必须遵守的规则：
 * 完整的日期与时间:`%tc`
 * 只有时间:`%tr`
 * 周、月、日:`%tA %tB %td`
-  <br>
-  <br>
     例子:<br>
     `format("%,6.1f",42.000) // 除了没有argument number,其它项目都有。`
 16. TCP的端口号是个16位的值。
