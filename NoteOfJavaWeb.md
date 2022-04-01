@@ -396,4 +396,103 @@ Servlet运行在Servlet容器(web服务器)中，其生命周期由容器来管�
 * 请求处理：**每次**请求Servlet时，Servlet容器都会调用Servlet的**service()**方法对请求进行处理
 * 服务终止：当需要释放内存或者容器关闭时，容器就会调用Servlet实例的**destroy()**方法完成资源的释放。在destroy()方法调用之后，容器会释放这个Servlet实例，该实例随后会被Java的垃圾收集器所回收
 
-### 
+### Servlet urlPattern配置
+* urlPattern配置规则
+	- 精确匹配
+		+ 配置路径`@WebServlet("/user/select")`
+		+ 访问路径`localhost:8080/web-demo/user/select`
+	- 目录匹配
+		+ 配置路径`@WebServlet("/user/*")`
+		+ 访问路径`localhost:8080/web-demo/user/aaa`、`localhost:8080/web-demo/user/bbb`
+	- 扩展名匹配
+		+ 配置路径`@WebServlet("*.do")`
+		+ 访问路径`localhost:8080/web-demo/aaa.do`、`localhost:8080/web-demo/bbb.do`
+	- 任意匹配(`/*`和'/'的效果一样，但`/*`的优先级更高，会优先拦截请求)(tomcat服务器中有一个默认的servlet，其配置路径是"/",它会访问项目中的静态资源，如果被自己写的Servlet覆盖，就访问不了了，所以请不要覆盖)
+		+ 配置路径`@WebServlet("/")`
+		+ 访问路径`localhost:8080/web-demo/hehe`、`localhost:8080/web-demo/haha`、`localhost:8080/web-demo/haha/hehe`
+* "/"和"/\*"的区别
+	- 当我们的项目中的Servlet配置了"/"，会覆盖掉tomcat中的DefaultServlet，当其它的url-pattern都匹配不上时都会走这个Servlet
+	- 当我们的项目中配置了"/"，意味着匹配任意访问路径
+	
+## Request-使用request对象来获取请求数据
+* 继承体系
+	1. ServletRequest ——> Java提供的请求对象根接口
+	2. HttpServletRequest ——> Java提供的对Http协议封装的请求对象接口
+	3. RequestFacade ——> Tomcat定义的实现类
+* 请求数据
+	- 请求行：`GET/request-demo/req1?username=zhangsan&password=123 HTTP/1.1`
+		+ `String getMethod()`获取请求方式:`GET`
+		+ `String getContextPath()`获取虚拟目录(项目访问路径):`/request-demo`
+		+ `StringBuffer getRequestURL()`获取URL(统一资源定位符):`http://localhost:8080/request-demo/req1`
+		+ `String getRequestURI()`获取URI(统一资源标识符):`/request-demo/req1`
+		+ `String getQueryString()`获取请求参数(GET方式):`username=zhangsan&password=123`
+	- 请求头：`User-Agent:Mozilla/5.0 Chrome/91.0.4472.106`
+		+ `String getHeader(String name)`根据请求头名称，获取值
+	- 请求体：`username=superbaby&password=123`
+		+ `ServletputStream getInputStream()`获取字节输入流
+		+ `BufferedReader getReader()`获取字符输入流
+### Request-通用方式获取请求参数(对get和post方式都一样)
+* `Map<String, String[]> getParameterMap()`获取所有参数Map集合
+* `String[] getParameterValues(String name)`根据名称获取参数值(数组)
+* `String getParameter(String name)`根据名称获取参数值(单个值)
+
+### 解决中文乱码问题
+* POST
+	- `request.setCharacterEncoding("UTF-8")`
+* GET(下面的方法也可以用于POST)
+	- 乱码原因：tomcat解码的默认字符集是ISO-8859-1
+	- 解决方法
+		+ 先对乱码数据进行编码：转为字节数组`byte[] bytes = username.getBytes(StandardCharsets.IOS_8859_1);`
+		+ 字节数组解码`username = new String(bytes, StandardCharsets.UTF_8);`
+		+ username即还原为中文字符串
+### 请求转发-一种在服务器内部的资源跳转方式
+* 实现方式:`req.getRequestDispatcher("转发资源路径").forward(req.resp);`
+* 请求转发资源间共享数据：使用Request对象
+	- `void setAttribute(String name, Object o)`存储数据到request域中
+	- `Object getAttribute(String name)`根据key，获取值
+	- `void removeAttribute(String name)`根据key，删除该键值对
+* 请求转发特点
+	- 浏览器地址栏路径不发生变化
+	- 只能转发到当前服务器的内部资源
+	- 一次请求，可以在转发的资源间使用request共享数据
+## Response-使用response对象来设置响应数据
+* 继承体系
+	1. ServletResponse ——> Java提供的请求对象根接口
+	2. HttpServletResponse ——> Java提供的对Http协议封装的请求对象接口
+	3. ResponseFacade ——> Tomcat定义的实现类
+* 响应数据
+	- 响应行：`HTTP/1.1 200 OK`
+		+ `void setStatus(int sc);`设置响应状态码
+	- 响应头：`Context-Type:text/html`
+		+ `void setHeader(String name, String value);`
+	- 响应体：`<html><head></head><body></body></html>`
+		+ `PrintWriter getWriter()`获取字符输出流
+		+ `ServletOutputStream getOutputStream()`获取字节输出流
+### Response完成重定向-一种资源跳转方式
+* 实现方式:
+	- `resp.setStatus(302);`
+	- `resp.setHeader("location", "重定向资源路径");`
+	- 简化方式完成重定向`resp.sendRedirect("重定向资源路径")`
+* 重定向特点
+	- 浏览器地址栏路径发生变化
+	- 可以重定向到任意位置的资源(服务器内部、外部均可)
+	- 两次请求，不能在多个资源使用request共享数据
+
+### Response响应字符数据
+* 通过Response对象获取字符输出流`PrintWriter writer = resp.getWriter();`
+* 写数据`writer.write("aaa");`
+
+### Response响应字节数据
+* 通过Response对象获取字符输出流`ServletOutputStream outputStream = resp.getOutputStream();`
+* 写数据`outputStream.write(字节数据);`
+
+## 路径问题
+### 明确路径谁用
+* 浏览器使用:需要加虚拟目录(项目访问路径)
+* 服务端使用:不需要加虚拟目录
+
+
+		
+
+
+
