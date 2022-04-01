@@ -271,7 +271,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 * COUNT()函数<br>
 `SELECT COUNT(*) AS num_cust FROM customers;`<br>
   COUNT()函数有两种使用方式：<br>
-  (1) 使用COUNT(*)对表中行的数目进行计数，不管表列中包含的是空值(NULL)还是非空值。<br>
+  (1) 使用COUNT(\*)对表中行的数目进行计数，不管表列中包含的是空值(NULL)还是非空值。<br>
   (2) 使用COUNT(column)对特定列中具有值的行进行计数，忽略NULL值。
   
 * MAX()函数<br>
@@ -292,7 +292,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 * **以上五个聚集函数都可以如下使用**<br>
   (1) 对所有的行执行计算，指定ALL参数或不给参数(因为ALL时默认参数行为);<br>
   (2) 只包含不同的值，指定DISTINCT参数。例如： `SELECT AVG(DISTINT prod_price) AS avg_price FROM products WHERE vend_id = 1003;`其中使用了DISTINCT参数，因此平均值只考虑各个不同的价格。<br>
-  **注意**:如果指定列名，则DISTINCT只能用于COUNT()。DISTINCT只能用于COUNT(*),因此不允许使用COUNT(DISTINCT)，否则会产生错误。类似的，DISTINCT必须使用列名，不能用于计算或表达式。
+  **注意**:如果指定列名，则DISTINCT只能用于COUNT()。DISTINCT只能用于COUNT(\*),因此不允许使用COUNT(DISTINCT)，否则会产生错误。类似的，DISTINCT必须使用列名，不能用于计算或表达式。
   
 ### 分组数据
 #### GROUP BY
