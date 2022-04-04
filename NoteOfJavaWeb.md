@@ -491,6 +491,208 @@ Servlet运行在Servlet容器(web服务器)中，其生命周期由容器来管�
 * 浏览器使用:需要加虚拟目录(项目访问路径)
 * 服务端使用:不需要加虚拟目录
 
+## MVC模式和三层架构
+### MVC模式-是一种分层开发的模式
+* M：Model，业务模型，处理业务
+* V：View，视图，界面展示
+* C：Controller，控制器，处理请求，调用模型和视图
+
+### 三层架构
+* 数据访问层(dao/mapper)：对数据库的CRUD基本操作
+* 业务逻辑层(service)：对业务逻辑进行封装，组合数据访问层层中基本功能，形成复杂的业务逻辑功能
+* 表现层(web/controller)：接收请求，封装数据，调用业务逻辑层，响应数据
+
+## 会话跟踪技术
+* 会话:用户打开浏览器，访问web服务器的资源，会话建立，直到有一方断开连接欸，会话结束。在一次会话中可以包含**多次**请求和响应
+
+* 会话跟踪:一种维护浏览器状态的方法，服务器需要识别多次请求是否来自于同一浏览器，以便在同一次会话的多次请求间**共享数据**H
+	- HTTP协议是无状态的，每次浏览器向服务器请求时，服务器都会将该请求视为**新的**请求，因此我们需要会话跟踪技术来实现会话内数据共享
+
+* 实现方式
+	- 客户端会话跟踪技术：Cookie
+	- 服务端会话跟踪技术：Session
+
+### Cookie
+* 客户端会话技术，将数据保存在客户端，以后每次请求都携带Cookie数据进行访问
+* Cookie基本使用
+	- 创建Cookie对象，设置数据
+		+ `Cookie cookie = new Cookie("key", "value");`
+	- 发送Cookie到客户端：使用response对象
+		+ `response.addCookie(cookie);`
+	- 获取客户端携带的所有Cookie，使用request对象
+		+ `Cookie[] cookies = request.getCookies();`
+	- 遍历数组，获取每一个Cookie对象:for
+	- 使用Cookie对象方法获取数据
+		+ `cookie.getName();`
+		+ `cookie.getValue();`
+* Cookie原理
+	- Cookie的实现是基于HTTP协议的
+		+ 响应头：set-cookie
+		+ 请求头：cookie
+* Cookie使用细节
+	- Cookie存活时间
+		+ 默认情况下，Cookie存储在浏览器内存中，当浏览器关闭，内存释放，则Cookie被销毁
+		+ setMaxAge(int seconds)：设置Cookie存活时间
+			1. 正数：将Cookie写入浏览器所在电脑的硬盘，持久化存储。到时间自动删除
+			2. 负数：默认值，Cookie在当前浏览器内存中，当浏览器关闭，则Cookie被销毁
+			3. 零：删除对应Cookie
+		+ Cookie存储中文
+			* Cookie不能直接存储中文
+			* 如需要存储，则需要进行转码：URL编码`URLEncoder.eccode("需要编码的内容", "UTF-8");`
+### Session
+* 服务端会话跟踪技术：将数据保存到服务端
+* JavaEE提供HttpSession接口，来实现一次会话的多次请求间数据共享功能
+* Session基本使用
+	- 获取Session对象
+		+ `HttpSession session = request.getSession();`
+	- Session对象功能
+		+ `void setAttribute(String name, Object o)`存储数据到session域中
+		+ `Object getAttribute(String name)`根据key，获取值
+		+ `void removeAttribute(String name)`根据key，删除该键值对
+* Session原理
+	- Session是基于Cookie实现的
+* Session使用细节
+	- Session钝化、活化
+		+ 服务器重启后，Session中的数据是否还在？
+			* 钝化：在服务器正常关闭后，Tomcat会自动将Session数据写入硬盘的文件中
+			* 活化：再次启动服务器后，从文件中加载数据到Session中
+	- Session销毁
+		+ 默认情况下，无操作，30分钟自动销毁(在web.xml中配置)
+			* `<session-config>`
+			* `	<session-timeout>30</session-timeout>`
+			* `</session-config>`
+		+ 调用Session对象的invalidate()方法即可自我销毁
+		
+### Cookie和Session总结
+* Cookie和Session都是来完成一次会话内多次请求间数据共享的
+* 区别
+	- 存储位置：Cookie实践爱那个数据存储在客户端，Session将数据存储在服务端
+	- 安全性：Cookie不安全，Session安全
+	- 数据大小：Cookie最大3KB，Session无大小限制
+	- 存储时间：Cookie可以长期存储，Session默认30分钟
+	- 服务器性能：Cookie不占服务器资源，Session占用服务器资源
+
+## Filter
+* Filter表示过滤器，是JavaWeb三大组件(Servlet、Filter、Listener)之一
+* 过滤器可以把对资源的请求拦截下来，从而实现一些特殊的功能
+* 过滤器一般完成一些通用的操作，比如：权限控制、统一编码处理、敏感字符处理等等
+
+### Filter快速入门
+* 定义类，实现Filter接，并重写其所有方法
+```java
+public class FilterDemo implements Filter {
+	public void init(FilterConfig filterConfig);
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain);
+	public void destroy();
+}
+```
+* 配置Filter拦截资源的路径：在类上定义@WebFilter注解
+```java
+@WebFilter("/*")
+public class FilterDemo implements Filter {
+	...
+}
+```
+* 在doFilter方法中输出一句话，并放行
+```java
+public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+	System.out.println("filter被执行了...");
+	//放行
+	chain.doFilter(request, response);
+}
+```
+
+### Filter拦截路径配置
+* 拦截具体的资源：/index.jsp：只有访问index.jsp时才会被拦截
+* 目录拦截：/user/\*：访问/user下的所有资源，都会被拦截
+* 后缀名拦截：\*.jsp：访问后缀名为jsp的资源，都会被拦截
+* 拦截所有：/\*：访问所有资源，都会被拦截
+
+### 过滤器链
+* 一个Web应用，可以配置多个过滤器，这多个过滤器称为过滤器链。
+* 注解配置的Filter，优先级按照过滤器类名(字符串)的自然排序
+
+## Listener
+* Listener表示过滤器，是JavaWeb三大组件(Servlet、Filter、Listener)之一
+* 监听器可以监听就是在application,session,request三个对象创建、销毁或者往其中添加修改删除属性时自动执行代码的功能组件
+* Listener分类：JavaWeb中提供了8个监听器
+<table>
+	<tr>
+		<th>监听器分类</th>
+		<th>监听器名称</th>
+		<th>作用</th>
+	</tr>
+	<tr>
+		<td rowspan = 2>ServeltConext监听</td>
+		<td>ServletContextListener</td>
+		<td>用于对ServeltConext对象进行监听(创建、销毁)</td>
+	</tr>
+	<tr>
+		<td>ServletContextAttributeListener</td>
+		<td>对ServletContext对象中属性的监听(增删改属性)</td>
+	</tr>
+	<tr>
+		<td rowspan = 4>Session监听</td>
+		<td>HttpSessionListener</td>
+		<td>对Session对象的整体状态的监听(创建、销毁)</td>
+	</tr>
+	<tr>
+		<td>HttpSessionAttributeListener</td>
+		<td>对Session对象中的属性监听(增删改属性)</td>
+	</tr>
+	<tr>
+		<td>HttpSessionBindingListener</td>
+		<td>监听对象于Session的绑定和解除</td>
+	</tr>
+	<tr>
+		<td>HttpSessionActiveListener</td>
+		<td>对Session数据的钝化和活化的监听</td>
+	</tr>
+	<tr>
+		<td rowspan = 2>Request监听</td>
+		<td>ServletRequestListener</td>
+		<td>对Request对象进行监听(创建、销毁)</td>
+	</tr>
+	<tr>
+		<td>ServletRequestAttributeListener</td>
+		<td>对Request对象中属性的监听(增删改属性)</td>
+	</tr>
+</table>
+
+## AJAX
+* Asynchronous JavaScript And XML -- 异步的JavaScrip和XML
+* AJAX作用
+	- 与服务器进行数据交换：通过AJAX可以给服务器发送请求，并获取服务器响应的数据
+		+ 使用了AJAX和服务器进行通信，就可以使用HTML+AJAX来替换JSP页面了
+	- 异步交互：可以在不重新加载整个页面的情况下，与服务器交换数据并更新部分网页的技术，如：搜索联想、用户名是否可用校验，等等...
+	
+
+## Axios异步框架
+* Axios对原生的AJAX进行封装、简化书写
+* 官网:https://www.axios-http.cn
+
+## JSON
+* JavaScript Object Notation。JavaScript对象表示法
+* 由于其语法简单、层次结构鲜明，现多用于数据载体，在网络中进行数据传输
+### JSON数据和Java对象转换
+* Fastjson是阿里巴巴提供的一个Java语言编写的高性能功能完善的JSON库，是目前Java语言中最快的JSON库，可以实现Java对象和JSON字符串的相互转换
+### 使用
+* 导入坐标
+```xml
+<dependency>
+	<groupId>com.alibaba</groupId>
+	<artfactId>fastjson</artfactId>
+	<version>1.2.62</version>
+</dependency>
+```
+* Java对象转JSON
+	- `String jsonStr = JSON.toJSONString(obj);`
+* JSON字符串转Java对象
+	- `User user = JSON.parseObject(jsonStr, User.class);`
+	
+
+
+
 
 		
 
