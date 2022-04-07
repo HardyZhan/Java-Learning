@@ -671,6 +671,19 @@ public void doFilter(ServletRequest request, ServletResponse response, FilterCha
 * Axios对原生的AJAX进行封装、简化书写
 * 官网:https://www.axios-http.cn
 
+### Axios快速入门
+* 引入axios的js文件
+	- `<script src="js/axios-0.18.0.js"></script>`
+* 使用axios发送请求,并获取响应结果
+```JavaScript
+axios({
+	method:"get",//也可以为post
+	url:"http://localhost:8080/brand-case/selectAllServlet"
+}).then (function (resp) {
+	alert(resp.data);
+})
+```
+
 ## JSON
 * JavaScript Object Notation。JavaScript对象表示法
 * 由于其语法简单、层次结构鲜明，现多用于数据载体，在网络中进行数据传输
@@ -689,6 +702,82 @@ public void doFilter(ServletRequest request, ServletResponse response, FilterCha
 	- `String jsonStr = JSON.toJSONString(obj);`
 * JSON字符串转Java对象
 	- `User user = JSON.parseObject(jsonStr, User.class);`
+	
+## Vue
+* Vue是一套前端框架，免除原生JavaScript中的DOM操作，简化书写
+* 基于MVVM（Model-View-ViewModel）思想，实现数据的双向绑定，将编程的关注点放在数据上
+* 官网：https://cn.vuejs.org
+### Vue常用指令
+* HTML标签上带有v-前缀的特殊属性，不同指令具有不同含义，
+* 常用指令
+<table>
+	<tr>
+		<th>指令</th>
+		<th>作用</th>
+	</tr>
+	<tr>
+		<td>v-bind</td>
+		<td>为HTML标签绑定属性值，如设置href、css样式等</td>
+	</tr>
+	<tr>
+		<td>v-model</td>
+		<td>在表单元素上创建双向数据绑定</td>
+	</tr>
+	<tr>
+		<td>v-on</td>
+		<td>为HTML标签绑定事件</td>
+	</tr>
+	<tr>
+		<td>v-if</td>
+		<td rowspan = 3>条件性的渲染某元素，判定为true时渲染，否则不渲染</td>
+	</tr>
+	<tr>
+		<td>v-else</td>
+	</tr>
+		<tr>
+		<td>v-else-if</td>
+	</tr>
+	<tr>
+		<td>v-show</td>
+		<td>根据条件展示某元素，区别在于切换的是display属性的值</td>
+	</tr>
+	<tr>
+		<td>v-for</td>
+		<td>列表渲染，遍历容器的元素或者对象的属性</td>
+	</tr>
+</table>
+
+### Vue生命周期
+* 生命周期的八个阶段：每触发一个生命周期事件，会自动执行一个生命周期方法（钩子）
+
+| 状态 | 阶段周期 |
+|:-----:|:-------:|
+| beforeCreate | 创建前 |
+| created | 创建后 |
+| beforeMount | 载入前 |
+| mounted | 挂在完成 |
+| beforeUpdate | 更新前 |
+| update | 更新后 |
+| beforeDestroy | 销毁前 |
+| destroeyed | 销毁后 |
+
+* mounted：挂在完成，Vue初始化成功，HTML页面渲染成功
+	- 发送异步请求，加载数据
+	
+
+## Element
+* Element:是饿了么公司前端开发团队提供的一套基于Vue的网站组件库，用于快速组件网站
+* 组件：组成网页的部件，例如超链接、按钮、图片、表格等等
+* Element官网：https://element.eleme.cn/#/zh-CNListener
+
+### Element快速入门
+* 引入Element的css、js文件和Vue.js
+* 创建Vue核心对象
+* 官网复制组件代码
+
+### Element布局
+* Layout布局：通过基础的24分栏，迅速简便地创建布局
+* Container布局：用于布局的容器组件，方便快速搭建页面的基本结构
 	
 
 

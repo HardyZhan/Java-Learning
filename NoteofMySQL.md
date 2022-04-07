@@ -13,7 +13,9 @@
 * USE——使用USE关键字来选择数据库，在数据库选择成功后会显示Database changed消息。
   
 ### 了解数据库和表
+
 SHOW命令:数据库、表、列、用户、权限等的信息被存储在数据库和表中，不过内部的表一般不直接访问，可以用SHOW命令来显示这些信息。<br>
+
 * SHOW DATABASES;——返回可用数据库的一个列表。
 * SHOW TABLES;——返回当前选择的数据库内可用表的列表。
 * SHOW COLUMNS FROM sutdent;——SHOW COLUMNS要求给出一个表名(本例中的student)，它对每个字段返回一行，行中包含字段名、数据类型、是否允许NULL、键信息、默认值以及其他信息。
@@ -34,8 +36,8 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
   
 * 限制结果:使用LIMIT——`SELECT prod_name FROM products LIMIT 5`;`LIMIT 5`指示MySQL返回不多于5行。<br>
 而为了得出下一个5行，可指定要检索的**开始行**和**行数**——`SELECT prod_name FROM products LIMIT 5,5`，`LIMIT 5,5`指示MySQL返回从行5开始的5行。<br>
-  注意:
-  (1) 检索出来的第一行为行0而不是行1.因此，LIMIT 1，将检索出第二行而不是第一行。
+  注意:<br>
+  (1) 检索出来的第一行为行0而不是行1.因此，LIMIT 1，将检索出第二行而不是第一行。<br>
   (2) 在行数不够时——LIMIT中指定要检索的行数为检索的最大行数。如果没有足够的行，MySQL将只返回它能反回的那么多行。
 
 * SQL语句由子句构成，有些子句是必需的，而有的是可选的。一个子句通常由一个关键字和所提供的数据组成。子句的例子有SELECT语句的FROM子句。
@@ -182,7 +184,9 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 * MySQL除了支持RTrim()，还支持LTrim()(去掉串左边的空格)以及Trim()(去掉串左右两边的空格)。
 
 #### 使用别名
+
 一个未命名的列不能用于客户机应用种，因为客户机没有办法引用它。所以需要给SELECT语句拼接好的字段一个列别名。
+
 * 别名(alias)是一个字段或值的替换名。别名用AS关键字赋予，如: `SELECT Concat(RTrim(vend_name), ' (',RTrim(vend_country), ')') AS vend_title FROM vendors ORDER BY vend_name;`<br>
 它指示SQL创建一个包含指定计算的名为vend_title的计算字段。任何客户机应用都可以按名引用这个列，就像它是一个实际的表列一样。
   
@@ -214,6 +218,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 | Soundex() | 返回串的SOUNDEX值 |
 | SubString() | 返回子串的字符 |
 | Upper() | 将串转换为大写 |
+
 * SOUNDEX是一个将任何文本串转换为描述其语音表示的字母数字模式的算法。SOUNDEX考虑了类似的发音字符和音节，使得能对串进行发音比较而不是字母比较。
 
 #### 常用日期和时间处理函数
