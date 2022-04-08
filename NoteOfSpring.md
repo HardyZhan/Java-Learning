@@ -8,6 +8,7 @@
 * 反射
 #### IOC接口(BeanFactory)
 Spring提供IOC容器实现两种方式:
+
 * BeanFactory:IOC容器基本实现方式，是Spring内部的使用接口，一般不提供给开发人员使用。
   <br> ***注意***:此方式在加载配置文件时不会创建对象，在获取对象(使用)时才会去创建对象。
 * ApplicationContext:BeanFactory接口的子接口，提供更多更强大的功能，一般由开发人员进行使用。
@@ -18,18 +19,21 @@ ApplicationContext接口有两个实现类:
 * ClassPathXmlApplicationContext:此实现类只需要输入src文件夹下的相对路径即可。
 #### IOC操作Bean管理(基于xml)
 Bean管理指的是两个操作:
+
 * Spring创建对象(基于xml)。
   
-`<bean id="user" class="com.atguigu.spring5.User></bean>`
+`<bean id="user" class="com.example.spring5.User></bean>`
   <br> (1) 在spring配置文件中，使用bean标签，标签里面添加对应属性，就可以实现对象创建。
   <br> (2) 在bean标签中有很多属性，常用属性有:
-  <br> * id属性：唯一标识。
-  <br> * class属性：类全路径(包类属性)。
+
+  * id属性：唯一标识。
+  * class属性：类全路径(包类属性)。
 * Spring注入属性(基于xml)。
   <br> (1) DI:依赖注入，就是注入属性。
-  <br> * 第一种方式就是使用set方法注入属性。
+  
+  * 第一种方式就是使用set方法注入属性。
   ```xml
-  <bean id="book" class="com.atguigu.spring5.Book">
+  <bean id="book" class="com.example.spring5.Book">
   <!--使用property完成属性注入
       name:类里面属性名称
       value:向里面注入的值
@@ -41,7 +45,7 @@ Bean管理指的是两个操作:
   <br> * 第二种方式就是通过有参构造注入属性。
   
   ```xml
-  <bean id="orders" class="com.atguigu.spring5.Orders">
+  <bean id="orders" class="com.example.spring5.Orders">
     <constructor-arg name="oname" value="电脑"></constructor-arg>
     <constructor-arg name="address" value="China"></constructor-arg>
     <!--<constructor-arg index="0" value=""></constructor-arg>
@@ -100,13 +104,13 @@ Bean管理指的是两个操作:
 
 ##### IOC操作Bean管理(外部属性文件)
 * 直接配置数据库信息
-<br> 配置德鲁伊连接池
+  - 配置德鲁伊连接池
   
 * 引入外部属性文件配置数据库连接池
-<br> (1) 创建外部属性文件,properties格式文件，写数据库信息
-<br> (2) 把外部properti属性文件引入到spring配置文件中
-  <br> 首先引入context名称空间
-  <br> 然后在spring配置文件使用标签引入外部属性文件
+  1. 创建外部属性文件,properties格式文件，写数据库信息
+  2. 把外部properti属性文件引入到spring配置文件中
+    a. 首先引入context名称空间
+    b. 然后在spring配置文件使用标签引入外部属性文件
 
 #### IOC操作Bean管理(基于注解方式)
 * 什么是注解？
@@ -256,15 +260,15 @@ Spring框架一般都是基于AspectJ实现AOP操作
 #### 事务操作(声明式事务管理参数配置)
 * 在Service类上面添加注解@Transactional，在这个注解里面可以配置事务相关参数
 * propagation:事务传播行为
-  <br> (1) 概念：多事务方法直接进行调用，这个过程中事务是如何进行管理的
-  <br> (2) 事务传播行为有7种
-  <br> (a) REQUIRED:如果有事务在运行，当前的方法就在这个事务内运行，否则，就启动一个新的事务，并在自己的事务内运行。
-  <br> (b) REQUIRES_NEW:当前的方法必须启动新事务，并在它自己的事务内运行，如果有事务正在运行，应该将它挂起。
-  <br> (c) SUPPORTS:如果有事务在运行，当前的方法就在这个事物内运行，否则它可以不运行在事务中。
-  <br> (d) NOT_SUPPORTED:当前的方法不应该运行在事务中，如果有运行的事务，将它挂起
-  <br> (e) MANDATORY:当前的方法必须运行在事务内部，如果没有正在运行的事务，就抛出异常
-  <br> (f) NEVER:当前的方法不应该运行在事务内部，如果有运行的事务，就抛出异常
-  <br> (g) NESTED:如果有事务在运行，当前的方法就应该在这个事务的嵌套事务内运行，否则，就启动一个新的事务，并在它自己的事务内运行
+  - 概念：多事务方法直接进行调用，这个过程中事务是如何进行管理的
+  - 事务传播行为有7种
+    + REQUIRED:如果有事务在运行，当前的方法就在这个事务内运行，否则，就启动一个新的事务，并在自己的事务内运行。
+    + REQUIRES_NEW:当前的方法必须启动新事务，并在它自己的事务内运行，如果有事务正在运行，应该将它挂起。
+    + SUPPORTS:如果有事务在运行，当前的方法就在这个事物内运行，否则它可以不运行在事务中。
+    + NOT_SUPPORTED:当前的方法不应该运行在事务中，如果有运行的事务，将它挂起
+    + MANDATORY:当前的方法必须运行在事务内部，如果没有正在运行的事务，就抛出异常
+    + NEVER:当前的方法不应该运行在事务内部，如果有运行的事务，就抛出异常
+    + NESTED:如果有事务在运行，当前的方法就应该在这个事务的嵌套事务内运行，否则，就启动一个新的事务，并在它自己的事务内运行
 * isolation:事务隔离级别
   <br> (1) 事务有特性称为隔离性，即多事务操作之间不会产生影响。
   <br> (2) 有三个读问题:脏读、不可重复读、幻读
