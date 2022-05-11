@@ -1,5 +1,5 @@
 # Java-Learning
-主要包含了JAVA基础、JVM虚拟机、并发、spring/spring-boot、MYSQL、spingMVC、JavaWeb等知识的笔记
+主要包含了JAVA基础、JVM虚拟机、并发编程、spring/spring-boot、MYSQL、spingMVC、JavaWeb、Docker、 Themeleaf等知识的笔记
 ## 目录
 * [《并发编程之美》笔记-NoteOfBingFa](NoteOfBingFa.md)
 * [黑马JavaWeb编程教学笔记-NoteOfJavaWeb](NoteOfJavaWeb.md)
@@ -10,3 +10,6 @@
 * [《Java8实战》笔记-NoteOfJava8](NoteofJava8.md)
 * [《Java核心卷I》笔记-NoteOfJavaHXJ](NoteofJavaHXJ.md)
 * [《MySQL应知应会》笔记-NoteOfMySQL](NoteofMySQL.md)
+* [Themeleaf基础语法](Thymeleaf基础语法.md)
+* [Docker简介](NoteOfDocker.md)
+* [JPA简介](NoteOfJPA.md)
