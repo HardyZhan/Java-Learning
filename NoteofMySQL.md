@@ -5,7 +5,7 @@
 * 数据类型:所容许的数据的类型。每个表列都有相应的数据类型，它限制(或容许)该列中存储的数据
 * 行:表中的一个记录
 * 主键:一列(或一组列),其值能够唯一区分表中每个行。<br>
-表中的任何列都可以作为主键，只要它满足一下条件:<br>
+  表中的任何列都可以作为主键，只要它满足一下条件:<br>
   (1) 任意两行都不具有相同的主键值。<br>
   (2) 每个行都必须具有一个主键值(主键列不允许NULL)。
   
@@ -32,7 +32,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 * 检索多个列:SELECT 列名,列名,列名 FROM 表名;
 * 检索所有列:SELECT * FROM 表名;
 * 检索不同的行:使用DISTINCT关键字，指示MySQL只返回不同的值——SELECT DISTINCT vend_id FROM products;<br>
-注意：不能部分使用DISTINCT.DISTINCT关键字应用于所有列而不仅是前置它的列。如果给出SELECT DISTINCT vend_id,prod_price，除非指定的两个列都不同，否则所有行都将被检索出来。
+  注意：不能部分使用DISTINCT.DISTINCT关键字应用于所有列而不仅是前置它的列。如果给出SELECT DISTINCT vend_id,prod_price，除非指定的两个列都不同，否则所有行都将被检索出来。
   
 * 限制结果:使用LIMIT——`SELECT prod_name FROM products LIMIT 5`;`LIMIT 5`指示MySQL返回不多于5行。<br>
 而为了得出下一个5行，可指定要检索的**开始行**和**行数**——`SELECT prod_name FROM products LIMIT 5,5`，`LIMIT 5,5`指示MySQL返回从行5开始的5行。<br>
@@ -60,7 +60,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 * WHERE子句操作符处理常用的=、<>(不等于)、!=、<、<=、>、>=，还有BETWEEN () AND ()。
 * 如果将值与串类型列进行比较，则需要线定单引号，如: `WHERE prod_name='fuses`，单引号用来限定字符串。
 * 一个特殊的WHERE子句可以用来检查具有NULL值的列。 `SELECT prod_name FROM products WHERE prod_price IS NULL`。<br>
-注意：**NULL与不匹配**，在通过过滤选择出不具有特定值的行时，你可能希望返回具有NULL值的行。但是，不行，因为未知具有特殊的含义，数据库不知道它们是否匹配，所以在匹配过滤或不匹配过滤时不返回它们。
+  注意：**NULL与不匹配**，在通过过滤选择出不具有特定值的行时，你可能希望返回具有NULL值的行。但是，不行，因为未知具有特殊的含义，数据库不知道它们是否匹配，所以在匹配过滤或不匹配过滤时不返回它们。
   
 ##### 组合WHERE子句
 * 为了进行更强的过滤控制，MySQL允许给出多个WHERE子句。这些子句可以用两种方式使用:以AND子句的方式或OR子句的方式使用。
@@ -95,12 +95,12 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 正则表达式是用来匹配文本的特殊的串(字符集合)。
 * 基本字符匹配。 `WHERE prod_name REGEXP ‘1000’`除关键字LIKE被REGEXP替代外，这条语句看上去非常像LIKE的语句，它告诉MySQL：REGEXP后所跟的东西作为正则表达式(与文字正文1000匹配的一个正则表达式)处理。
 * REGEXP与LIKE的重要差别：<br>
-`WHERE prod_name LIKE '1000';`与`WHERE prod_name REGEXP '1000'`如果被匹配的文本在列值中出现，LIKE将不会找到它，相应的行也不被返回(除非使用通配符)。而REGEXP在列值内进行匹配，如果被匹配的文本在列值出现，REGEXP将会找到它，相应的行将被返回。
+  `WHERE prod_name LIKE '1000';`与`WHERE prod_name REGEXP '1000'`如果被匹配的文本在列值中出现，LIKE将不会找到它，相应的行也不被返回(除非使用通配符)。而REGEXP在列值内进行匹配，如果被匹配的文本在列值出现，REGEXP将会找到它，相应的行将被返回。
   
 * MySQL中的正则表达式匹配不区分大小写。为区分大小写，可使用BINARY关键字，如 `WHERE prod_name REGEXP BINARY 'JetPack .000'`
 * 进行OR匹配。为搜索两个串之一，使用|，如： `WHERE prod_name REGEXP '1000|2000';`当然也可以给出两个以上的OR条件
 * 匹配几个字符之一。 `WHERE prod_name REGEXP '[123] Ton';`[123]定义一组字符，它的意思是匹配1或2或3，因此如果有，1 ton，2 ton和3 ton都匹配且返回。<br>
-字符集合也可以被否定，即，它们将匹配除指定字符外的任何东西。为否定一个字符集，在集合的开始处放置一个^即可，即[^123]。
+  字符集合也可以被否定，即，它们将匹配除指定字符外的任何东西。为否定一个字符集，在集合的开始处放置一个^即可，即[^123]。
   
 * 匹配范围。集合可用来定义要匹配的一个或多个字符。如下面的集合将匹配数字0到9：[0-9]。此外，范围不一定只是数值，[a-z]匹配任意字母字符。
 * 匹配特殊字符。.匹配任意字符，如果要找出包含.字符的值，需要用\\为前导。\\-表示查找-，\\.表示查找.。(为什么用两个反斜杠？多数正则表达式实现使用单个反斜杠转移特殊字符，以便能使用这些字符本身。但MySQL要求两个反斜杠，MySQL自己解释一个，正则表达式库解释另一个)
@@ -188,7 +188,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 一个未命名的列不能用于客户机应用种，因为客户机没有办法引用它。所以需要给SELECT语句拼接好的字段一个列别名。
 
 * 别名(alias)是一个字段或值的替换名。别名用AS关键字赋予，如: `SELECT Concat(RTrim(vend_name), ' (',RTrim(vend_country), ')') AS vend_title FROM vendors ORDER BY vend_name;`<br>
-它指示SQL创建一个包含指定计算的名为vend_title的计算字段。任何客户机应用都可以按名引用这个列，就像它是一个实际的表列一样。
+  它指示SQL创建一个包含指定计算的名为vend_title的计算字段。任何客户机应用都可以按名引用这个列，就像它是一个实际的表列一样。
   
 * 别名还有其它用途。常见的用途包括在实际的表列名不符合规定的字符(如空格)时重新命名它，在原来的名字含混或容易误解时扩充它，等等。
 * 别名有时也称为导出列(derived column)。
@@ -269,28 +269,28 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 | SUM() | 返回某列值之和 |
 
 * AVG()函数<br>
-`SELECT AVG(prod_price) AS avg_price FROM products;`<br>
+  `SELECT AVG(prod_price) AS avg_price FROM products;`<br>
   AVG()只用于单个列，只能用来确定特定数值列的平均值，而且列名必须作为函数参数给出。为了获得多个列的平均值，必须使用多个AVG()函数。<br>
   AVG()函数忽略列值为NULL的行。
   
 * COUNT()函数<br>
-`SELECT COUNT(*) AS num_cust FROM customers;`<br>
+  `SELECT COUNT(*) AS num_cust FROM customers;`<br>
   COUNT()函数有两种使用方式：<br>
   (1) 使用COUNT(\*)对表中行的数目进行计数，不管表列中包含的是空值(NULL)还是非空值。<br>
   (2) 使用COUNT(column)对特定列中具有值的行进行计数，忽略NULL值。
   
 * MAX()函数<br>
-`SELECT MAX(prod_price) AS max_price FROM products;`<br>
+  `SELECT MAX(prod_price) AS max_price FROM products;`<br>
   对非数值数据使用MAX()的时候，虽然MAX()一般用来找出最大的数值或日期值，但MySQL允许将它用来返回任意列中的最大值，包括返回文本列中的最大值。在用于文本数据时，如果数据按相应的列排序，则MAX()返回最后一行。<br>
   MAX()函数忽略列值为NULL的行。
   
 * MIN()函数<br>
-`SELECT MIN(prod_price) AS min_price FROM products;`<br>
+  `SELECT MIN(prod_price) AS min_price FROM products;`<br>
   对非数值数据使用MIN()的时候，MIN()函数与MAX()函数类似，MySQL允许将它用来返回任意列中的最小值，包括返回文本列中的最小值。在用于文本数据时，如果数据按相应的列排序，则MIN()返回最前面的行。<br>
   MIN()函数忽略列值为NULL的行。
   
 * SUM()函数<br>
-`SELECT SUM(quantity) AS items_ordered FROM orderitems WHERE order_num = 20005;`<br>
+  `SELECT SUM(quantity) AS items_ordered FROM orderitems WHERE order_num = 20005;`<br>
   在多个列上进行计算: `SELECT SUM(item_price*quantity) AS total_price FROM orderitems WHERE order_num = 20005;`<br>
   SUM()函数忽略列值为NULL的行。
   
@@ -309,7 +309,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 * 除聚集计算语句外，SELECT语句中的每个列都必须在GROUP BY子句中给出。
 * 如果分组列中具有NULL值，则NULL将作为一个分组返回。如果列中有多行NULL值，它们将分为一组。
 * GROUP BY子句必须出现在WHERE子句之后，ORDER BY子句之前。<br>
-**使用ROLLUP**:使用WITH ROLLUP关键字，可以得到每个分组以及每个分组汇总级别(针对每个分组)的值，如下: `SELECT vend_id, COUNT(*) AS num_prods FROM products GROUP BY vend_id WITH ROLLUP;`
+  **使用ROLLUP**:使用WITH ROLLUP关键字，可以得到每个分组以及每个分组汇总级别(针对每个分组)的值，如下: `SELECT vend_id, COUNT(*) AS num_prods FROM products GROUP BY vend_id WITH ROLLUP;`
   
 #### HAVING子句(过滤分组)
 目前为止所学过的所有类型的WHERE子句都可以用HAVING来替代。唯一的差别是WHERE过滤行，而HAVING过滤分组。
@@ -350,7 +350,7 @@ DESCRIBE语句:MySQL支持用DESCRIBE作为SHOW COLUMNS FROM的一种快捷方�
 #### 外键
 外键作为某个表中的一列，它包含另一个表的主键值，定义了两个表之间的关系。
 #### 创建联结
-```
+```mysql
 SELECT vend_name, prod_name, prod_price
 FROM vendors, products
 WHERE vendors.vend_id = products.vend_id
@@ -370,7 +370,7 @@ ORDER BY vend_name, prod_name;
 #### 内部联结
 目前为止所用的联结称为等值联结，它基于两个表之间的相等测试。这种联结也称为内部联结。对于这种联结可以使用稍微不同的语法来明确指定联结的类型:
 
-```
+```mysql
 SELECT vend_name, prod_name, prod_price
 FROM vendors INNER JOIN products
 ON vendors.vend_id = products.vend_id;
@@ -378,7 +378,7 @@ ON vendors.vend_id = products.vend_id;
 两个表之间的关系是FROM子句的组成部分，以INNER JOIN指定。在使用这种语法时，联结条件用特定的ON子句而不是WHERE子句给出。传递给ON的实际条件与传递给WHERE的相同。
 #### 联结多个表
 SQL对一条SELECT语句中可以联结的表的数目没有限制，通过AND连接。
-```
+```mysql
 SELECT prod_name, vend_name, prod_price, quantity
 FROM orderitems, products, vendors
 WHERE products.vend_id = vendors.vend_id
@@ -400,7 +400,7 @@ WHERE c.cust_id = 0.cust_id
 ```
 **注意**:表别名只在查询执行中使用。与列别名不一样，表别名不返回到客户机。
 #### 自联结
-```
+```mysql
 SELECT p1.prod_id, p1.prod_name
 FROM products AS p1, products AS p2
 WHERE p1.vend_id = p2.vend_id
@@ -410,7 +410,7 @@ WHERE p1.vend_id = p2.vend_id
 * 自联结通常作为外部语句用来替代从相同表中检索数据时使用的子查询语句。虽然最终结果是相同的，但有时候处理联结远比处理子查询快得多。
 ### 自然联结
 无论何时对表进行联结，应该至少有一个列出现在不止一个表中(被联结的列)。标准的联结(即前一章中介绍的内部联结)返回所有数据，甚至相同的列多次出现。自然联结排除多次出现，使每个列只返回一次。
-```
+```mysql
 SELECT c.*, o.order_num, o.order_date,
        oi.prod_id, oi.quantity, oi.item_price
 FROM customers AS c, orders AS o, orderitems AS oi
@@ -421,7 +421,7 @@ WHERE c.cust_id = o.cust_id
 事实上，迄今为止我们建立的每个内部联结都是自然联结，很可能我们永远不会用到不是自然联结的内部联结。
 #### 外部联结
 许多联结将一个表中的行与另一个表中的行相关联。但有时候会需要包含没有关联行的那些行。联结包含了那些相关表中没有关联行的行，这种类型的联结成为外部联结。
-```
+```mysql
 SELECT customers.cust_id, order.order_num
 FROM customers LEFT OUTER JOIN orders
   ON customers.cust_id = order.cust_id;
@@ -431,7 +431,7 @@ FROM customers LEFT OUTER JOIN orders
 * 上面的例子使用LEFT OUTER JOIN从FROM子句的左边表(customers表)中选择所有行。
 
 #### 使用带聚集函数的联结
-```
+```mysql
 SELECT customers.cust_name,
        customers.cust_id,
        COUNT(orders.order_num) AS num_ord
@@ -525,8 +525,9 @@ WHERE Match(note_text) Against('rabbit');
 * 排列提示(指定某些词比其他词更重要，更重要的词等级更高)
 * 表达式分组
 * 另外一些内容
-**即使没有FULLTEXT索引也可以使用**
+  **即使没有FULLTEXT索引也可以使用**
   
+
 使用方法:`Against('xxxx' IN BOOLEAN MODE)`
 
 全文本布尔操作符

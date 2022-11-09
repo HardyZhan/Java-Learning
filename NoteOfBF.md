@@ -365,7 +365,112 @@ synchronized块是Java提供的一种原子性内置锁，Java中的每个对象
 * 由于Java中的线程是与操作系统中的线程一一对应的，所以当一个线程在获取锁（比如独占锁）失败后，会被切换到内核状态而被挂起。当线程获取到锁时有需要将其切换到内核状态而唤醒该线程。而从用户状态切换到内核状态的开销是比较大的，在一定程度上会影响并发性能。
 * 自旋锁则是，当前线程在获取锁时，如果发现锁已经被其它线程占有，它不马上阻塞自己，在不放弃CPU使用权的情况下，多次尝试获取（默认次数是10，可以使用-XX:PreBlockSpinsh参数设置该值），很有可能在后面几次尝试中其它线程已经释放了该锁。如果尝试指定的次数后仍没有获取到该锁则当前线程才会被阻塞挂起。由此看来自旋锁是使用CPU时间换取线程阻塞与调度的开销，但是很有可能这些CPU时间白白浪费。
 
-## 三、
+## 三、Java并发包中锁原理剖析
+
+### 1. LockSupport工具类
+
+* JDK中的rt.jar包里面的LockSupport是个工具类，它的主要作用是挂起和唤醒线程，该工具类是创建锁和其它同步类的基础
+* LockSupport类与每个使用它的线程都会关联一个许可证，在**默认情况下**调用LockSupport类的方法的线程是**不持有许可证**的。
+
+### 2. 抽象同步队列AQS
+
+#### （1） AQS——锁的底层支持
+
+AbstractQueuedSynchronizer抽象同步队列简称AQS，它是实现同步器的基础组件，并发包中锁的底层就是使用AQS实现的。AQS的类图结构如下所示。
+
+[![aqs类图结构](pic\aqs类图结构.png)]()
+
+由图可以看到，AQS是一个FIFO的双向队列，其内部通过节点head和tail记录队首和队尾元素，队列元素的类型为Node。
+
+* Node中的thread变量用来存放进入AQS队列里面的线程
+* Node节点内部的SHARED用来标记该线程是获取共享资源时被阻塞挂起后放入AQS队列的，EXCLUSIVE用来标记线程是获取独占资源时被挂起后放入AQS队列的
+* waitStatus记录当前线程等待状态，可以为CANCELLED（线程被取消了）、SIGNAL（线程需要被唤醒）、CONDITION（线程在条件队列里面等待）、PROPAGATE（释放共享资源时需要通知其他节点）
+* prev记录当前节点的前驱节点
+* next记录当前节点的后继节点
+
+在AQS中维持了一个单一的状态信息state，可以通过getState、setState、compareAndSetState函数修改其值。
+
+* 对于ReentrantLock的实现来说，state可以用来表示当前线程获取锁的可重入次数
+* 对于读写锁ReentrantReadWriteLock来说，state的高16位表示读状态，也就是获取该读锁的次数，低16位表示获取到写锁的线程的可重入次数
+* 对于semaphore来说，state用来表示当前可用信号的个数
+* 对于CountDownlatch来说，state用来表示计数器当前的值
+
+AQS有个内部类ConditionObject，用来结合锁实现线程同步。ConditionObject可以直接访问AQS对象内部的变量，比如state状态值和AQS队列。ConditionObject是条件变量，每个条件变量对应一个条件队列（单项链表队列），其用来存放调用条件变量的await方法后被阻塞的线程，如类图所示，这个条件队列的头、尾元素分别为firstWaiter和lastWaiter。
+
+对于AQS来说，线程同步的关键是对状态值state进行操作。根据state是否属于一个线程，操作state的方式分为独占方式和共享方式。
+
+* 在独占方式下获取和释放资源使用的方法为
+  * `void acquire(int arg)`
+  * `void acquireInterruptibly(int arg)`
+  * `boolean release(int arg)`
+* 在共享方式下获取和释放资源的方法为
+  * `void acquireShared(int arg)`
+  * `void acquireShareInterruptibly(int arg)`
+  * `boolean releaseShared(int arg)`
+* 这两套函数中都有一个带有Interruptibly关键字的函数
+  * 不带Interruptibly关键字的方法获取资源时或者获取资源失败被挂起时，其他线程中断了该线程，那么该线程不会因为被中断而抛出异常，它还是继续获取资源或者被挂起，也就是说不对中断进行响应，忽略中断
+  * 而带Interruptibly关键字的方法要对中断进行响应，也就是线程在调用带Interruptibly关键字的方法获取资源时或者获取资源失败被挂起时，其他线程中断了该线程，那么该线程会抛出InterruptedException异常而返回
+
+#### （2） AQS——条件变量的支持
+
+* notify和wait是配合synchronized内置锁实现线程间同步的基础设施，条件变量的signal和await方法也是用来配合锁（使用AQS实现的锁）实现线程间同步的基础设施。
+* 它们的不同在于，synchronized同时只能对一个与共享变量的notify或wait方法实现同步，而AQS的一个锁可以对应多个条件变量。
+
+条件变量其实就是一个在AQS内部声明的ConditionObject对象，ConditionObject是AQS的内部类，可以访问AQS内部的变量（例如状态变量state）和方法。在每个条件变量内部都维护了一个条件队列，用来存放调用条件变量的await()方法时被阻塞的线程。**注意**这个条件队列和AQS队列不是一回事。
+
+## 四、 Java并发包中线程池ThreadPoolExecutor原理探究
+
+### 1. 介绍
+
+线程池主要解决两个问题：
+
+* 当执行大量异步任务时线程池能够提供较好的性能，在不使用线程池时，每当需要执行异步任务时直接new一个线程来运行，而线程的创建和销毁是需要开销的。线程池里面的线程是可复用的，不需要每次执行异步任务时都重新创建和销毁线程。
+* 线程池提供了一种资源限制和管理手段，比如可以限制线程的个数，动态新增线程等。每个ThreadPoolExecutor也保留了一些基本的统计数据，比如当前线程池完成的任务数目等。
+
+另外，线程池也提供了许多可调参数和可扩展接口，以满足不同情境的需要，程序员可以使用更方便的Executors的工厂方法，比如newCachedThreadPool(线程池线程个数最多可达Integer.MAX_VALUE，线程自动回收)、newFixedThreadPool(固定大小的线程池)和newSingleThreadExecutor(单个线程)等来创建线程池，当然用户还可以自定义。
+
+### 2. 类图介绍
+
+Executor其实是一个工具类，里面提供了好多静态方法，这些方法根据用户选择返回不同的线程池案例。ThreadPoolExecutor继承了AbstractExecutorService，成员变量ctl是一个Integer的原子变量，用来记录线程池状态和线程池中线程个数，类似于ReentrantReadWriteLock使用一个变量来保存两种信息。
+
+![ThreadPoolExecutor类图](pic\ThreadPoolExecutor类图.png)
+
+* 如上类图所示，其中mainLock是独占锁，用来控制新增Worker线程操作的原子性。termination是该锁对应的条件队列，在线程调用awaitTermination时用来存放阻塞的线程
+* Worker继承AQS和Runnable接口，是具体承载任务的对象。Worker继承了AQS，自己实现了简单不可重入锁，其中
+  * state=0表示锁未被获取状态
+  * state=1表示锁已经被获取的状态
+  * state=-1是创建时默认的状态，为了避免该线程在运行runWorker()方法前被中断
+
+这里假设Integer是32位二进制表示，则其中高3位用来表示线程池状态，后面29位用来记录线程池线程个数。
+
+线程池状态含义如下
+
+* RUNNING：接收新任务并且处理阻塞队列里的任务
+* SHUTDOWN：拒绝新任务但是处理阻塞队列里的任务
+* STOP：拒绝新任务并且抛弃阻塞队列里的任务，同时会中断正在处理的任务
+* TIDYING：所有任务都执行完（包含阻塞队列里面的任务）后当前线程池活动线程数为0，将要调用terminated方法
+* TERMINATED：终止状态。terminated方法调用完成以后的状态
+
+线程池状态转换列举如下
+
+* RUNNING->SHUTDOWN：显式调用shutdown()方法，或者隐式调用了finalize()方法里面的shutdown()方法
+* RUNNING或SHUTDOWN->STOP：显式调用shutdownNow()方法时
+* SHUTDOWN->TIDYING：当线程池和任务队列都为空时
+* STOP->TIDYING：当线程池为空时
+* TIDYING->TERMINATED：当terminated() hook方法执行完成时
+
+线程池参数如下
+
+* corePoolSize：线程池核心线程个数
+* workQueue：用于保存等待执行的任务的阻塞队列，比如基于数组的有界ArrayBlockingQueue、基于链表的无界LinkedBlockingQueue、最多只有一个元素的同步队列SynchronousQueue及优先队列PriorityBlockingQueue等
+* maximunPoolSize：线程池最大线程数量
+* ThreadFactory：创建线程的工厂
+* RejectedExecutionHandler：饱和策略，当队列满并且线程个数达到maximunPoolSize后采取的策略，比如AbortPolicy（抛出异常）、CallerRunsPolicy（使用调用者所在线程来运行任务）、DiscardOldestPolicy（调用poll丢弃一个任务，执行当前任务）及DiscardPolicy（默默丢弃，不抛出异常）
+* keeyAliveTime：存活时间。如果当前线程池中的线程数量比核心线程数量多，并且是闲置状态，则这些闲置的线程能存活的最大时间
+* TimeUnit：存活时间的单位时间
+* newFixedThreadPool：创建一个核心线程个数和最大线程个数都为nThreads的线程池，并且阻塞队列长度为Integer.MAX_VALUE。keeyAliveTime=0说明只要线程个数比核心线程个数多并且当前空闲则回收
+* newSingleThreadExecutor：创建一个核心线程个数和最大线程个数都为1的线程池，并且阻塞队列长度为Integer.MAX_VALUE。keeyAliveTime=0说明只要线程个数比核心线程个数多并且当前空闲则回收
+* newCachedThreadPool：创建一个按需创建线程的线程池，初始线程个数为0，最多线程个数为Integer.MAX_VALUE，并且阻塞队列为同步队列。keeyAliveTime=60说明只要当前线程在60s内空闲则回收。这个类型的特殊之处在于，加入同步队列的任务会被马上执行，同步队列里面最多只有一个任务
 
 
 
